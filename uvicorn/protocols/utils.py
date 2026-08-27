@@ -14,14 +14,15 @@ def get_remote_addr(transport: asyncio.Transport) -> tuple[str, int] | None:
     if socket_info is not None:
         try:
             info = socket_info.getpeername()
-            return (str(info[0]), int(info[1])) if isinstance(info, tuple) else None
+            if isinstance(info, tuple):
+                return (str(info[0]), int(info[1]))
         except OSError:  # pragma: no cover
             # This case appears to inconsistently occur with uvloop
             # bound to a unix domain socket.
-            return None
+            pass
 
     info = transport.get_extra_info("peername")
-    if info is not None and isinstance(info, list | tuple) and len(info) == 2:
+    if info is not None and isinstance(info, list | tuple) and len(info) >= 2:
         return (str(info[0]), int(info[1]))
     return None
 
